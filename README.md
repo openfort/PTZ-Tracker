@@ -9,16 +9,19 @@ The tracker is in use at lifechurch wil. Here are some links to see tracking in 
 ## Tested hardware
 - GTX1660 and Birddog P400
 
-## Dependencies
-- yolov8
-- scuthead dataset
-- onnx engine
-- ndi-python wrapper
-- opencv
+## Related projects
+- Ultralytics yolov8 [GitHub](https://github.com/ultralytics/ultralytics)
+- onnxruntime [GitHub](https://github.com/microsoft/onnxruntime)
+- NDI Python wrapper [GitHub](https://github.com/buresu/ndi-python)
 
-## Installation windows
+## Installation Windows
 The inference runs on windows direct-ml, only windows version is avaiable yet.
-- download repo
-- install python 3.10.11
-- install requirements
-- run in python or build with nuitka
+1. Download PTZ-Tracker zip file
+2. Extract files
+3. Run tracker.exe
+
+## Build windows
+1. Download repo
+2. Install python 3.10.11
+3. Install requirements from requirements.txt
+4. Run in python or build with nuitka

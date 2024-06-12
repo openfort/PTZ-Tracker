@@ -7,7 +7,7 @@ The tracker is in use at lifechurch wil. Here are some links to see tracking in 
 - [youtube - lifechurch wil](https://youtu.be/-PTu4VsTdoA?t=1351)
 
 ## Tested hardware
-- GTX1660 and Birddog P400
+- GTX1660 and Birddog P400 (up to 4 streams at 30 fps)
 
 ## Related projects
 - Ultralytics yolov8 [GitHub](https://github.com/ultralytics/ultralytics)

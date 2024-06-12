@@ -13,6 +13,7 @@ The tracker is in use at lifechurch wil. Here are some links to see tracking in 
 - Ultralytics yolov8 [GitHub](https://github.com/ultralytics/ultralytics)
 - onnxruntime [GitHub](https://github.com/microsoft/onnxruntime)
 - NDI Python wrapper [GitHub](https://github.com/buresu/ndi-python)
+- https://www.di.ens.fr/willow/research/headdetection/
 
 ## Installation Windows
 The inference runs on windows direct-ml, only windows version is avaiable yet.

@@ -2,7 +2,7 @@
 A free PTZ-Tracker for any NDI enabled PTZ-Camera. The software runs on a desktop and captures the NDI Video feed from any PTZ-Camera on the network. Any detected head can be choosen for tracking and the software sends NDI-PTZ commands to the camera to keep the deteted head in frame.
 
 ## tested hardware
-- Birddog P400
+- GTX1070 and Birddog P400
 
 ## dependencies
 - yolov8

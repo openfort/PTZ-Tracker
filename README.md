@@ -4,10 +4,27 @@ A free PTZ tracker for any NDI-enabled PTZ camera. The software runs on a deskto
 
 ## Demo
 
+<div>
+    <video autoplay loop muted>
+        <source src="images/demo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+
 The tracker is in use at lifechurch wil. Here are some links to see tracking in action on youtube:
 
 - [youtube - lifechurch wil](https://youtu.be/Er5B_IqR304?t=709)
 - [youtube - lifechurch wil](https://youtu.be/-PTu4VsTdoA?t=1351)
+
+## Usage
+
+- Write the camera name and speed to the configx.json file, where x corresponds to the number of running instances.
+
+- Use the keys w, a, s, d, e and c to move the camera
+
+- Click on a green head to initiate tracking.
+
+- Press x to stop tracking
 
 ## Tested hardware
 

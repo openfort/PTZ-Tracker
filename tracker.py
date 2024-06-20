@@ -24,7 +24,7 @@
 
 # author: openfort
 # date: 02.03.24
-# version: 3.1
+# version: 3.10
 
 import os
 #os.environ["KIVY_NO_CONSOLELOG"] = "1"
@@ -398,7 +398,7 @@ class CamController:
         self.cam.zoom(0)
 
 class windowGUI:
-    def __init__(self, name, app, controller):
+    def __init__(self, name, controller):
         self.name = name
         self.target_center = controller.center
         self.deadzone = controller.deadzone
@@ -437,9 +437,6 @@ class windowGUI:
                 else:
                     color = self.tracked_color
                 cv2.line(image_draw, np.add(tracked_object.direction, tracked_object.tracked_box[:2]).astype(np.int32), np.add(tracked_object.direction*3, tracked_object.tracked_box[:2]).astype(np.int32), color, thickness=1)
-                #cv2.line(image_draw, tracked_object.tracked_box[:2], np.add(-tracked_object.movement, tracked_object.tracked_box[:2]).astype(np.int32), color=(255,100,255), thickness=2)
-            #cv2.line(image_draw, (int(tracked_object.tracked_box[0]), int(tracked_object.tracked_box[1]-image_draw.shape[0]*0.15*1.1)), (int(tracked_object.tracked_box[0]), int(tracked_object.tracked_box[1]+image_draw.shape[0]*0.15*1.1)), color=(100,0,0), thickness=2) # zoom line
-            #cv2.line(image_draw, (int(tracked_object.tracked_box[0]), int(tracked_object.tracked_box[1]-image_draw.shape[0]*0.15*0.9)), (int(tracked_object.tracked_box[0]), int(tracked_object.tracked_box[1]+image_draw.shape[0]*0.15*0.9)), color=(255,100,100), thickness=2) # zoom line
         self.draw_controls(image_draw, ptz_values)
         self.image = image_draw
 
@@ -453,7 +450,7 @@ class windowGUI:
             cv2.circle(img, draw_center, radius=size, color=light_gray, thickness=1)
             cv2.line(img, draw_center, (int(draw_center[0]+ptz_values[0]*size), draw_center[1]), color=gray, thickness=2)
             cv2.line(img, draw_center, (draw_center[0], int(draw_center[1]+ptz_values[1]*size)), color=gray, thickness=2)
-            cv2.circle(img, draw_center, radius=0, color=black, thickness=3)
+            cv2.circle(img, draw_center, radius=0, color=black, thickness=2)
             cv2.line(img, (draw_center[0]+size, draw_center[1]), (int(draw_center[0]+size*1.2), draw_center[1]), color=light_gray, thickness=1)
             cv2.line(img, (int(draw_center[0]+size*1.1), draw_center[1]), (int(draw_center[0]+size*1.1), int(draw_center[1]+size*ptz_values[2])), color=gray, thickness=2)
 
@@ -474,11 +471,14 @@ class TrackingApp:
         self.head_detector = YOLOv8('model/head_s_640.onnx', 0.3, 0.5)
         self.head_pose = YOLOv8('model/nose-pose19Ps.onnx', 0.6)
         self.move = CamController(self.stream, self.Vorschau, center, speed)
-        self.window = windowGUI(f'PTZ Tracker {self.name}', self, self.move)
+        self.window = windowGUI(f'PTZ Tracker {self.name}', self.move)
         self.head_results = None
         self.tracked = None
         self.prep_thread = None
         self.pressed_key = 0
+
+        self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4
+        self.video = cv2.VideoWriter(f'{self.name}.mp4', self.fourcc, fps=25, frameSize=self.Vorschau)
     
     def preprocess(self):
         frame = self.stream.get_frame()
@@ -495,6 +495,9 @@ class TrackingApp:
                 self.move.update(self.tracked)
                 self.tracked.direction = self.get_direction()
         self.window.update(self.stream.frame, self.head_results, self.tracked, self.stream.ptz_values)
+
+        self.video.write(self.window.image)
+
         if self.pressed_key == 'x':
             self.tracked = None
             self.move.stop()
@@ -511,6 +514,8 @@ class TrackingApp:
             json.dump(self.data, json_file, indent=4)
         self.stream.close()
         print('app close')
+
+        self.video.release()
 
     def find_head(self,event,x,y,flags,param):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -578,7 +583,7 @@ class kivyApp(App):
         Window.size = (1280, 704)
         Window.bind(on_key_down=self.on_keyboard_down)
         Window.bind(on_key_up=self.on_keyboard_up)
-        self.title = 'tracking App'
+        self.title = f'tracking App 3.10'
         layout = BoxLayout(orientation='vertical')
 
         # image widget

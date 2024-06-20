@@ -31,6 +31,13 @@ The inference runs on windows direct-ml, only windows version is avaiable yet.
 ## Build Windows
 
 1. Download repo
+
 2. Install python 3.9.7
+
 3. Install requirements from requirements.txt
+
 4. Run in python or build with nuitka
+   
+   `py .\tracker.py`
+   
+   `nuitka .\tracker.py`

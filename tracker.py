@@ -239,8 +239,7 @@ class YOLOv8:
         self.model_path = model_path
         #### Load Model
         opt_session = rt.SessionOptions()       # onnx options
-        opt_session.enable_mem_pattern = False
-        opt_session.execution_mode = rt.ExecutionMode.ORT_SEQUENTIAL
+        opt_session.execution_mode = rt.ExecutionMode.ORT_PARALLEL
         opt_session.graph_optimization_level = rt.GraphOptimizationLevel.ORT_DISABLE_ALL
         EP_list = ['DmlExecutionProvider', 'CPUExecutionProvider']
         self.ort_session = rt.InferenceSession(model_path, sess_options=opt_session, providers=EP_list)      # onnx runtime

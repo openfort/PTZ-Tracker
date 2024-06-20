@@ -4,12 +4,7 @@ A free PTZ tracker for any NDI-enabled PTZ camera. The software runs on a deskto
 
 ## Demo
 
-<div>
-    <video autoplay loop muted>
-        <source src="images/demo.mp4" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
+![](C:\Users\jansc\Documents\Software\GitHub\NDI-PTZ-Tracker\images\demo.gif)
 
 The tracker is in use at lifechurch wil. Here are some links to see tracking in action on youtube:
 

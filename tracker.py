@@ -164,7 +164,7 @@ class NDIstream:
         sources_text = []
         sources_text.append('Looking for sources ...')
         for i, s in enumerate(sources):
-            sources_text.append(f'{i+1}. {s.ndi_name}')
+            sources_text.append(f'   {i+1}. {s.ndi_name}')
         for s in sources:
             if self.name in s.ndi_name:
                 self.new_source(s)
@@ -175,11 +175,11 @@ class NDIstream:
         if self.ndi_recv == None:
             self.frame = cv2.resize(cv2.imread('images/cat.jpg'), self.resolution, interpolation=cv2.INTER_NEAREST)
             text = self.find_sources()
-            text_position = [self.resolution[0]//3, 20]
+            text_position = [self.resolution[0]//3-30, 24]
             if text:
                 for line in text:
                     text_position[1] += 20
-                    cv2.putText(self.frame, line, org=text_position, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0,255,0), thickness=1)
+                    cv2.putText(self.frame, line, org=text_position, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0,0,0), thickness=1)
             return self.frame
         else:
             while True:
@@ -230,8 +230,10 @@ class NDIstream:
         if self.ptz_en:
             ndi.recv_ptz_pan_tilt_speed(self.ndi_recv,0,0)
             ndi.recv_ptz_zoom_speed(self.ndi_recv,0)
-        ndi.recv_destroy(self.ndi_recv)
-        ndi.find_destroy(self.ndi_find)
+        if self.ndi_recv:
+            ndi.recv_destroy(self.ndi_recv)
+        if self.ndi_find:
+            ndi.find_destroy(self.ndi_find)
         ndi.destroy()
         print('ndi close')
 

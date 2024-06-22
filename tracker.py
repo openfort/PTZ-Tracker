@@ -335,12 +335,12 @@ class CamController:
         self.xy = np.divide(self.center, self.shape)    # normalized target
         self.target_height = 0.25                       # normalized target height
         self.deadzone = np.array((0.03, 0.03, 0.02))     # pan, tilt, zoom
-        (Kp, Ki, Kd) = (4,0,0)
         self.pidcontroller = [PIDController(speed,0,0), PIDController(speed,0,0), PIDController(6,0,0)]
         self.speed_factor = np.zeros(3)
         self.speed_factor_strength = 200        # big number(200)->weak, small number(10)->strong
         self.max_speed = 1
         self.moving_flag = 0
+        self.fps = 25
 
     def calc_controlls(self, actual_point, target_point, pidcontroller, deadzone_size=0.1, movement_direction=0, mov_dir_strength=80, max_speed=1, exponent=1):
         if movement_direction > mov_dir_strength:
@@ -371,13 +371,19 @@ class CamController:
             pan = 0
         else:
             pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1.3)
+            if self.fps < 24:
+                pan *= self.fps / 24
         if self.lock_ptz[1]:
             tilt = 0
         else:
             tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1.3, max_speed=0.5)
+            if self.fps < 24:
+                tilt *= self.fps / 24
         self.cam.pan_tilt((pan, tilt))
         if not self.lock_ptz[2]:
             zoom = self.calc_controlls(tracked_height, self.target_height, self.pidcontroller[2], self.deadzone[2], exponent=1.2)
+            if self.fps < 24:
+                zoom *= self.fps / 24
             self.cam.zoom(-zoom)
 
     def control(self, keys):
@@ -678,6 +684,7 @@ class kivyApp(App):
         self.dt = np.append(self.dt[1:], self.dt_new)
         #print(self.dt)
         fps = len(self.dt)/sum(self.dt)
+        self.tracker.move.fps = fps
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_size = 0.6
         if fps > 23.5:

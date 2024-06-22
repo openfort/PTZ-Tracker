@@ -130,7 +130,7 @@ class Webcam:
 
     def pan_tilt(self, pan_tilt):
         pass
-    def zoon(self, zoom):
+    def zoom(self, zoom):
         pass
 
 class NDIstream:
@@ -326,9 +326,10 @@ class tracked_obj:
         return 1
 
 class CamController:
-    def __init__(self, cam, Vorschau, center, speed=2):
+    def __init__(self, cam, Vorschau, center, speed=2, lock_hvz=[False, True, True]):
         self.cam = cam
         self.shape = Vorschau
+        self.lock_ptz = lock_hvz
         self.center = np.array(center)
         self.xy = np.divide(self.center, self.shape)    # normalized target
         self.target_height = 0.25                       # normalized target height
@@ -365,12 +366,18 @@ class CamController:
             tracked_height = tracked_box[2] / self.shape[1]  # width larger than height
         else:
             tracked_height = tracked_box[3] / self.shape[1]  # height larger than width
-        pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1.3)
-        tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1.3, max_speed=0.5)
-        #self.cam.pan_tilt((pan, tilt))
-        self.cam.pan_tilt((pan, 0))
-        zoom = self.calc_controlls(tracked_height, self.target_height, self.pidcontroller[2], self.deadzone[2], exponent=1.2)
-        #self.cam.zoom(-zoom)
+        if self.lock_ptz[0]:
+            pan = 0
+        else:
+            pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1.3)
+        if self.lock_ptz[1]:
+            tilt = 0
+        else:
+            tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1.3, max_speed=0.5)
+        self.cam.pan_tilt((pan, tilt))
+        if not self.lock_ptz[2]:
+            zoom = self.calc_controlls(tracked_height, self.target_height, self.pidcontroller[2], self.deadzone[2], exponent=1.2)
+            self.cam.zoom(-zoom)
 
     def control(self, keys):
         speed = 0.3
@@ -469,12 +476,13 @@ class TrackingApp:
                 self.data = json.load(file)
         self.name = self.data['cam']
         speed = self.data['speed']
+        lock_hvz = [self.data['lock_horizontal'], self.data['lock_vertical'], self.data['lock_zoom']]
         center = np.array((320, 90))
         self.Vorschau = np.array((640, 352))
         self.stream = NDIstream(self.name, self.Vorschau)
         self.head_detector = YOLOv8('model/head_s_640.onnx', 0.3, 0.5)
         self.head_pose = YOLOv8('model/nose-pose19Ps.onnx', 0.6)
-        self.move = CamController(self.stream, self.Vorschau, center, speed)
+        self.move = CamController(self.stream, self.Vorschau, center, speed, lock_hvz)
         self.window = windowGUI(f'PTZ Tracker {self.name}', self.move)
         self.head_results = None
         self.tracked = None

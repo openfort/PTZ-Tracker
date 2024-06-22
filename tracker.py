@@ -4,7 +4,7 @@
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/nose-pose19Ps.onnx=model/nose-pose19Ps.onnx
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/images/cat.jpg=images/cat.jpg
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/images/target.ico=images/target.ico
-# nuitka-project: --include-data-files={MAIN_DIRECTORY}/config.json=config.json
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/default_config.json=default_config.json
 
 # updates:
     # fixed some performance issues and preview scaling
@@ -203,17 +203,21 @@ class NDIstream:
                     ndi.recv_free_metadata(self.ndi_recv, m)
     
     def pan_tilt(self, pan_tilt):
-        pan_tilt = np.clip(pan_tilt, -1, 1)
-        self.ptz_values[0:2] = pan_tilt
-        if self.ptz_en:
-            pan_tilt = np.array(pan_tilt).astype(np.float32)
-            ndi.recv_ptz_pan_tilt_speed(self.ndi_recv, -pan_tilt[0], -pan_tilt[1])
-    
+        self.ptz_values[0] += pan_tilt[0]
+        self.ptz_values[1] += pan_tilt[1]
+        self.ptz_values[0:2] = np.clip(self.ptz_values[0:2], -1, 1)
+
     def zoom(self, zoom):
-        zoom = np.clip(zoom, -1, 1)
-        self.ptz_values[2] = -zoom
+        self.ptz_values[2] = self.ptz_values[2]-zoom
+        self.ptz_values[2] = np.clip(self.ptz_values[2], -1, 1)
+
+    def send_ptz_values(self):
         if self.ptz_en:
-            ndi.recv_ptz_zoom_speed(self.ndi_recv, zoom)
+            ndi.recv_ptz_pan_tilt_speed(self.ndi_recv, -self.ptz_values[0], -self.ptz_values[1])
+            ndi.recv_ptz_zoom_speed(self.ndi_recv, self.ptz_values[2])
+        cp_ptz = self.ptz_values
+        self.ptz_values = np.zeros(3)
+        return cp_ptz
 
     def save_preset(self, number):
         if self.ptz_en:
@@ -368,27 +372,27 @@ class CamController:
         zoom = self.calc_controlls(tracked_height, self.target_height, self.pidcontroller[2], self.deadzone[2], exponent=1.2)
         #self.cam.zoom(-zoom)
 
-    def control(self, key):
+    def control(self, keys):
         speed = 0.3
-        if key == 'e':
+        if 'e' in keys:
             self.moving_flag = 1
             self.cam.zoom(speed*2)
-        elif key == 'c':
+        if 'c' in keys:
             self.moving_flag = 1
             self.cam.zoom(-speed*2)
-        elif key == 'w':
+        if 'w' in keys:
             self.moving_flag = 1
-            self.cam.pan_tilt((0, -speed))
-        elif key == 'a':
+            self.cam.pan_tilt((0, -speed/3))
+        if 'a' in keys:
             self.moving_flag = 1
             self.cam.pan_tilt((-speed, 0))
-        elif key == 's':
+        if 's' in keys:
             self.moving_flag = 1
-            self.cam.pan_tilt((0, speed))
-        elif key == 'd':
+            self.cam.pan_tilt((0, speed/3))
+        if 'd' in keys:
             self.moving_flag = 1
             self.cam.pan_tilt((speed, 0))
-        elif key == None and self.moving_flag:
+        if keys == [] and self.moving_flag:
             self.moving_flag = 0
             self.cam.zoom(0)
             self.cam.pan_tilt((0, 0))
@@ -461,7 +465,7 @@ class TrackingApp:
             with open(self.config, 'r') as file:
                 self.data = json.load(file)
         except:
-            with open(f'config.json', 'r') as file:
+            with open(f'default_config.json', 'r') as file:
                 self.data = json.load(file)
         self.name = self.data['cam']
         speed = self.data['speed']
@@ -477,15 +481,17 @@ class TrackingApp:
         self.prep_thread = None
         self.pressed_key = 0
 
-        self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4
-        self.video = cv2.VideoWriter(f'{self.name}.mp4', self.fourcc, fps=25, frameSize=self.Vorschau)
+        self.record = False
+        if self.record:
+            self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4
+            self.video = cv2.VideoWriter(f'{self.name}.mp4', self.fourcc, fps=25, frameSize=self.Vorschau)
     
     def preprocess(self):
         frame = self.stream.get_frame()
         self.head_results, scores = self.head_detector.detection(self.stream.frame)       # cut to 640 x 352
 
-    def update_mt(self, key):
-        self.pressed_key = key
+    def update_mt(self, keys):
+        self.pressed_keys = keys
         if self.tracked != None:
             if self.tracked.update(self.head_results, self.stream.frame) == 0:
                 self.tracked = None
@@ -494,18 +500,19 @@ class TrackingApp:
             else:
                 self.move.update(self.tracked)
                 self.tracked.direction = self.get_direction()
-        self.window.update(self.stream.frame, self.head_results, self.tracked, self.stream.ptz_values)
+        ptz = self.stream.send_ptz_values()        
+        self.window.update(self.stream.frame, self.head_results, self.tracked, ptz)
 
-        self.video.write(self.window.image)
+        if self.record:
+            self.video.write(self.window.image)
 
-        if self.pressed_key == 'x':
+        if 'x' in self.pressed_keys:
             self.tracked = None
             self.move.stop()
             #self.stream.load_preset(20)
-        elif self.pressed_key == 'l':
+        if 'l' in self.pressed_keys:
             self.stream.save_preset(20)
-        else:
-            self.move.control(self.pressed_key)
+        self.move.control(self.pressed_keys)
         #self.auto_track()       # automatically track first found object
         return
     
@@ -515,7 +522,8 @@ class TrackingApp:
         self.stream.close()
         print('app close')
 
-        self.video.release()
+        if self.record:
+            self.video.release()
 
     def find_head(self,event,x,y,flags,param):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -579,7 +587,7 @@ class TrackingApp:
 
 class kivyApp(App):
     def build(self):
-        self.key = None
+        self.keys = []
         Window.size = (1280, 704)
         Window.bind(on_key_down=self.on_keyboard_down)
         Window.bind(on_key_up=self.on_keyboard_up)
@@ -611,11 +619,13 @@ class kivyApp(App):
         return layout
     
     def on_keyboard_down(self, instance, keyboard, keycode, text, modifiers):
-        self.key = text
-        #print(text)
+        if not chr(keycode+93) in self.keys:
+            self.keys.append(chr(keycode+93))
+        return True
 
     def on_keyboard_up(self, instance, keyboard, keycode):
-        self.key = None
+        self.keys.remove(chr(keycode+93))
+        return True
     
     def on_stop(self):
         # Function to be called when the app is closing
@@ -641,7 +651,7 @@ class kivyApp(App):
     
     def update_image(self, dt):     # load new texture
         self.thread.join()
-        if self.key == 'q':
+        if 'q' in self.keys:
             self.stop()
         self.dt_new = dt
         height, width, _ = self.frame.shape
@@ -654,7 +664,7 @@ class kivyApp(App):
     def loop(self):   # update texture
         self.tracker.prep_thread = Thread(target=self.tracker.preprocess)
         self.tracker.prep_thread.start()
-        self.tracker.update_mt(self.key)
+        self.tracker.update_mt(self.keys)
         # Display fps
         self.dt = np.append(self.dt[1:], self.dt_new)
         #print(self.dt)

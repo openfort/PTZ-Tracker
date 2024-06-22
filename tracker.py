@@ -3,7 +3,6 @@
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/head_s_640.onnx=model/head_s_640.onnx
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/nose-pose19Ps.onnx=model/nose-pose19Ps.onnx
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/images/cat.jpg=images/cat.jpg
-# nuitka-project: --include-data-files={MAIN_DIRECTORY}/images/target.ico=images/target.ico
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/default_config.json=default_config.json
 
 # updates:
@@ -15,6 +14,8 @@
     # resolution matched to input frame
     # changed model to width 640
     # speed correction from json
+    # improved manual cam controls
+    # individual axis lock
 
 # issues:
     # no known issues
@@ -23,11 +24,9 @@
     # -
 
 # author: openfort
-# date: 02.03.24
+# date: 22.02.24
 # version: 3.10
 
-import os
-#os.environ["KIVY_NO_CONSOLELOG"] = "1"
 from kivy.app import App
 from kivy.uix.image import AsyncImage
 from kivy.graphics.texture import Texture
@@ -167,7 +166,7 @@ class NDIstream:
         for i, s in enumerate(sources):
             sources_text.append(f'{i+1}. {s.ndi_name}')
         for s in sources:
-            if s.ndi_name == self.name:
+            if self.name in s.ndi_name:
                 self.new_source(s)
                 return
         return sources_text

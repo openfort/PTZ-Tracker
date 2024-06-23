@@ -504,7 +504,7 @@ class TrackingApp:
         self.record = False
         if self.record:
             self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4
-            self.video = cv2.VideoWriter(f'{self.name}.mp4', self.fourcc, fps=25, frameSize=self.Vorschau)
+            self.video = cv2.VideoWriter(f'offline/{self.name}.mp4', self.fourcc, fps=25, frameSize=self.Vorschau)
     
     def preprocess(self):
         frame = self.stream.get_frame()

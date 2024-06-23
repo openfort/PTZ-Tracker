@@ -4,7 +4,7 @@ A free PTZ tracker for any NDI-enabled PTZ camera. The software runs on a deskto
 
 ## Demo
 
-![](C:\Users\jansc\Documents\Software\GitHub\NDI-PTZ-Tracker\images\demo.jpg)
+![](https://raw.githubusercontent.com/openfort/NDI-PTZ-Tracker/main/images/demo.jpg?token=GHSAT0AAAAAACT7K7YGUVJPVYDSF5SJXWPSZTYJUCA)
 
 The tracker is in use at lifechurch wil. Here are some links to see tracking in action on youtube:
 

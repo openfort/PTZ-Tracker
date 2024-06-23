@@ -136,6 +136,7 @@ class NDIstream:
     def __init__(self, NDI_cam, resolution):
         self.ptz_en = False
         self.ptz_values = np.zeros(3)       # pan, tilt, zoom
+        self.old_ptz_values = np.zeros(3)
         self.resolution = resolution
         self.name = NDI_cam
         self.frame = None
@@ -167,6 +168,7 @@ class NDIstream:
             sources_text.append(f'   {i+1}. {s.ndi_name}')
         for s in sources:
             if self.name in s.ndi_name:
+                self.name = s.ndi_name
                 self.new_source(s)
                 return
         return sources_text
@@ -207,16 +209,16 @@ class NDIstream:
         self.ptz_values[0:2] = np.clip(self.ptz_values[0:2], -1, 1)
 
     def zoom(self, zoom):
-        self.ptz_values[2] = self.ptz_values[2]-zoom
+        self.ptz_values[2] += zoom
         self.ptz_values[2] = np.clip(self.ptz_values[2], -1, 1)
 
     def send_ptz_values(self):
-        if self.ptz_en:
+        if self.ptz_en and (self.ptz_values != self.old_ptz_values):
             ndi.recv_ptz_pan_tilt_speed(self.ndi_recv, -self.ptz_values[0], -self.ptz_values[1])
             ndi.recv_ptz_zoom_speed(self.ndi_recv, self.ptz_values[2])
-        cp_ptz = self.ptz_values
+        self.old_ptz_values = self.ptz_values
         self.ptz_values = np.zeros(3)
-        return cp_ptz
+        return self.old_ptz_values
 
     def save_preset(self, number):
         if self.ptz_en:
@@ -532,6 +534,7 @@ class TrackingApp:
         return
     
     def close(self):
+        self.data['cam'] = self.stream.name
         with open(self.config, "w") as json_file:
             json.dump(self.data, json_file, indent=4)
         self.stream.close()

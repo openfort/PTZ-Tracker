@@ -388,8 +388,11 @@ class CamController:
                 zoom *= self.fps / 24
             self.cam.zoom(-zoom)
 
-    def control(self, keys):
-        speed = 0.3
+    def control(self, keys, tracking=False):
+        if tracking:
+            speed = 0.1
+        else:
+            speed = 0.3
         if 'e' in keys:
             self.moving_flag = 1
             self.cam.zoom(speed*2)
@@ -398,13 +401,13 @@ class CamController:
             self.cam.zoom(-speed*2)
         if 'w' in keys:
             self.moving_flag = 1
-            self.cam.pan_tilt((0, -speed/3))
+            self.cam.pan_tilt((0, -speed))
         if 'a' in keys:
             self.moving_flag = 1
             self.cam.pan_tilt((-speed, 0))
         if 's' in keys:
             self.moving_flag = 1
-            self.cam.pan_tilt((0, speed/3))
+            self.cam.pan_tilt((0, speed))
         if 'd' in keys:
             self.moving_flag = 1
             self.cam.pan_tilt((speed, 0))
@@ -496,7 +499,7 @@ class TrackingApp:
         self.head_results = None
         self.tracked = None
         self.prep_thread = None
-        self.pressed_key = 0
+        self.pressed_keys = []
 
         self.record = False
         if self.record:
@@ -529,7 +532,10 @@ class TrackingApp:
             #self.stream.load_preset(20)
         if 'l' in self.pressed_keys:
             self.stream.save_preset(20)
-        self.move.control(self.pressed_keys)
+        if self.tracked == None:
+            self.move.control(self.pressed_keys, tracking=False)
+        else:
+            self.move.control(self.pressed_keys, tracking=True)
         #self.auto_track()       # automatically track first found object
         return
     

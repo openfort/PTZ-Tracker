@@ -70,20 +70,8 @@ class PIDController:
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
-        self.speed = 15000
         self.prev_error = 0
         self.integral = 0
-    
-    def calc_Kp(self, object_shape):
-        # big object Kd = 7 (130000), small object (10000) Kd = 2
-        #size = object_shape[2] * object_shape[3]
-        #self.Kp = (size-1000)/self.speed+1.5
-        pass
-        #print(self.Kp)
-    
-    def set_Kp(self, Kp):
-        #self.Kp = Kp
-        pass
 
     def calculate(self, setpoint, process_variable):
         error = setpoint - process_variable
@@ -365,10 +353,6 @@ class CamController:
     def update(self, tracked):
         tracked_box = tracked.tracked_box
         tracked_point = np.divide(tracked_box[0:2], self.shape)     # norm position of the tracked object
-        if tracked_box[2] > tracked_box[3]:                         # norm by height of tracked object
-            tracked_height = tracked_box[2] / self.shape[1]  # width larger than height
-        else:
-            tracked_height = tracked_box[3] / self.shape[1]  # height larger than width
         if self.lock_ptz[0]:
             pan = 0
         else:
@@ -383,6 +367,10 @@ class CamController:
                 tilt *= self.fps / 24
         self.cam.pan_tilt((pan, tilt))
         if not self.lock_ptz[2]:
+            if tracked_box[2] > tracked_box[3]:                  # norm by height of tracked object
+                tracked_height = tracked_box[2] / self.shape[1]  # width larger than height
+            else:
+                tracked_height = tracked_box[3] / self.shape[1]  # height larger than width
             zoom = self.calc_controlls(tracked_height, self.target_height, self.pidcontroller[2], self.deadzone[2], exponent=1.2)
             if self.fps < 24:
                 zoom *= self.fps / 24

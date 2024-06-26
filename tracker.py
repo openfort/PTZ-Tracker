@@ -201,7 +201,7 @@ class NDIstream:
         self.ptz_values[2] = np.clip(self.ptz_values[2], -1, 1)
 
     def send_ptz_values(self):
-        if self.ptz_en and (self.ptz_values != self.old_ptz_values):
+        if self.ptz_en and any(self.ptz_values != self.old_ptz_values):
             ndi.recv_ptz_pan_tilt_speed(self.ndi_recv, -self.ptz_values[0], -self.ptz_values[1])
             ndi.recv_ptz_zoom_speed(self.ndi_recv, self.ptz_values[2])
         self.old_ptz_values = self.ptz_values

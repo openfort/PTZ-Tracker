@@ -463,7 +463,7 @@ class windowGUI:
             cv2.line(img, draw_center, (draw_center[0], int(draw_center[1]+ptz_values[1]*size)), color=gray, thickness=2)
             cv2.circle(img, draw_center, radius=0, color=black, thickness=2)
             cv2.line(img, (draw_center[0]+size, draw_center[1]), (int(draw_center[0]+size*1.2), draw_center[1]), color=light_gray, thickness=1)
-            cv2.line(img, (int(draw_center[0]+size*1.1), draw_center[1]), (int(draw_center[0]+size*1.1), int(draw_center[1]+size*ptz_values[2])), color=gray, thickness=2)
+            cv2.line(img, (int(draw_center[0]+size*1.1), draw_center[1]), (int(draw_center[0]+size*1.1), int(draw_center[1]-size*ptz_values[2])), color=gray, thickness=2)
 
 class TrackingApp:
     def __init__(self, config):

@@ -16,6 +16,7 @@
     # speed correction from json
     # improved manual cam controls
     # individual axis lock
+    # optimized tracking calculation
 
 # issues:
     # no known issues
@@ -25,7 +26,7 @@
 
 # author: openfort
 # date: 22.02.24
-# version: 3.10
+# version: 1.0
 
 from kivy.app import App
 from kivy.uix.image import AsyncImage
@@ -322,31 +323,30 @@ class CamController:
         self.shape = Vorschau
         self.lock_ptz = lock_hvz
         self.center = np.array(center)
-        self.xy = np.divide(self.center, self.shape)    # normalized target
+        self.xy = np.round(np.divide(self.center, self.shape), decimals=2)    # normalized target
         self.target_height = 0.25                       # normalized target height
-        self.deadzone = np.array((0.03, 0.03, 0.02))     # pan, tilt, zoom
+        self.deadzone = np.array((0.03, 0.03, 0.05))     # pan, tilt, zoom
         self.pidcontroller = [PIDController(speed,0,0), PIDController(speed,0,0), PIDController(6,0,0)]
         self.speed_factor = np.zeros(3)
         self.speed_factor_strength = 200        # big number(200)->weak, small number(10)->strong
-        self.max_speed = 1
         self.moving_flag = 0
         self.fps = 25
 
     def calc_controlls(self, actual_point, target_point, pidcontroller, deadzone_size=0.1, movement_direction=0, mov_dir_strength=80, max_speed=1, exponent=1):
+        diff = target_point - actual_point
+        deadzone_size = deadzone_size/2
+        if abs(diff) < deadzone_size:
+            return 0
         if movement_direction > mov_dir_strength:
             movement_direction = mov_dir_strength
-        if actual_point < target_point - deadzone_size/2:
-            actual_point *= target_point/(target_point-deadzone_size/2)
+        if diff > deadzone_size:
+            diff -= deadzone_size
             speed_factor = -movement_direction/mov_dir_strength
-        elif actual_point > target_point + deadzone_size/2:
-            actual_point = target_point + (actual_point-target_point-deadzone_size/2)*(1-target_point)/(1-target_point-deadzone_size/2)
+        elif -diff > deadzone_size:
+            diff += deadzone_size
             speed_factor = movement_direction/mov_dir_strength
-        else:
-            actual_point = target_point
-            speed_factor = 0
         speed_factor += 1
-        actual_point = np.clip(actual_point, 0, 1)
-        result = speed_factor*pidcontroller.calculate(target_point, actual_point)
+        result = speed_factor*diff*pidcontroller.Kp
         result = -(abs(result)**exponent) if result < 0 else (result**exponent)
         return np.clip(-result, -max_speed, max_speed)
 
@@ -603,7 +603,7 @@ class kivyApp(App):
         Window.size = (1280, 704)
         Window.bind(on_key_down=self.on_keyboard_down)
         Window.bind(on_key_up=self.on_keyboard_up)
-        self.title = f'tracking App 3.10'
+        self.title = f'tracking App 1.0'
         layout = BoxLayout(orientation='vertical')
 
         # image widget

@@ -26,7 +26,7 @@
 
 # author: openfort
 # date: 22.02.24
-# version: 1.0
+# version: 0.1.0
 
 from kivy.app import App
 from kivy.uix.image import AsyncImage
@@ -366,7 +366,7 @@ class CamController:
             if self.fps < 24:
                 tilt *= self.fps / 24
         self.cam.pan_tilt((pan, tilt))
-        if not self.lock_ptz[2]:
+        if not self.lock_ptz[2] and tracked.mosse == None:
             if tracked_box[2] > tracked_box[3]:                  # norm by height of tracked object
                 tracked_height = tracked_box[2] / self.shape[1]  # width larger than height
             else:
@@ -603,7 +603,7 @@ class kivyApp(App):
         Window.size = (1280, 704)
         Window.bind(on_key_down=self.on_keyboard_down)
         Window.bind(on_key_up=self.on_keyboard_up)
-        self.title = f'tracking App 1.0'
+        self.title = f'tracking App 0.1.0'
         layout = BoxLayout(orientation='vertical')
 
         # image widget

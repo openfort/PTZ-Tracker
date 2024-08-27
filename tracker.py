@@ -17,6 +17,7 @@
     # improved manual cam controls
     # individual axis lock
     # optimized tracking calculation
+    # handling signal lost
 
 # issues:
     # no known issues
@@ -41,6 +42,7 @@ import onnxruntime as rt
 import cv2
 import json
 import psutil
+import time
 
 def intersec(single_box, bounding_boxes):
     """
@@ -173,6 +175,7 @@ class NDIstream:
                     cv2.putText(self.frame, line, org=text_position, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.5, color=(0,0,0), thickness=1)
             return self.frame
         else:
+            start = time.time()
             while True:
                 t, v, a, m = ndi.recv_capture_v3(self.ndi_recv, 100)
                 if t == ndi.FRAME_TYPE_VIDEO:
@@ -187,10 +190,17 @@ class NDIstream:
                     if ndi.recv_ptz_is_supported(self.ndi_recv):
                         self.ptz_en = True
                         print("ptz is available")
+                    start = time.time()
                 elif t == ndi.FRAME_TYPE_AUDIO:
                     ndi.recv_free_audio_v3(self.ndi_recv, a)
+                    start = time.time()
                 elif t == ndi.FRAME_TYPE_METADATA:
                     ndi.recv_free_metadata(self.ndi_recv, m)
+                    start = time.time()
+                if time.time()-0.5 > start:
+                    break
+            self.close()
+            return np.zeros((self.resolution[1], self.resolution[0], 3))
     
     def pan_tilt(self, pan_tilt):
         self.ptz_values[0] += pan_tilt[0]
@@ -223,8 +233,10 @@ class NDIstream:
             ndi.recv_ptz_zoom_speed(self.ndi_recv,0)
         if self.ndi_recv:
             ndi.recv_destroy(self.ndi_recv)
+            self.ndi_recv = None
         if self.ndi_find:
             ndi.find_destroy(self.ndi_find)
+            self.ndi_find = None
         ndi.destroy()
         print('ndi close')
 

@@ -1,6 +1,14 @@
-# NDI PTZ Tracker
+# PTZ Tracker
 
 A free PTZ tracker for any NDI-enabled PTZ camera. The software runs on a desktop and captures the NDI video feed from any PTZ camera on the network. Any detected head can be selected for tracking and the software will send NDI PTZ commands to the camera to keep the detected head in frame.
+
+## NDI®
+
+NDI® is a registered trademark of Vizrt NDI AB  
+
+For more information about NDI® refer to [ndi.video](ndi.video).  
+
+You may also use [NDI tools](ndi.video/tools)
 
 ## Demo
 

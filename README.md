@@ -12,7 +12,7 @@ You may also use [NDI tools](ndi.video/tools).
 
 ## Demo
 
-![](https://raw.githubusercontent.com/openfort/NDI-PTZ-Tracker/main/images/demo.jpg?token=GHSAT0AAAAAACWVOCGOLJRIUZVYWIP7HP54ZWOHIUQ)The tracker is in use at lifechurch wil. Here are some links to see tracking in action on youtube:
+![](https://github.com/openfort/PTZ-Tracker/blob/main/images/demo.jpg?raw=true)The tracker is in use at lifechurch wil. Here are some links to see tracking in action on youtube:
 
 - [youtube - lifechurch wil](https://youtu.be/Er5B_IqR304?t=710)
 - [youtube - lifechurch wil](https://youtu.be/-PTu4VsTdoA?t=1350)

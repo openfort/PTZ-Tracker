@@ -197,7 +197,7 @@ class NDIstream:
                 elif t == ndi.FRAME_TYPE_METADATA:
                     ndi.recv_free_metadata(self.ndi_recv, m)
                     start = time.time()
-                if time.time()-0.5 > start:
+                if time.time()-5 > start:
                     break
             self.close()
             return np.zeros((self.resolution[1], self.resolution[0], 3))

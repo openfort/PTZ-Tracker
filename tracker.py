@@ -1,6 +1,6 @@
 # nuitka-project: --standalone
 # nuitka-project: --disable-console
-# nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/head_s_640.onnx=model/head_s_640.onnx
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/head_640_v8s.onnx=model/head_640_v8s.onnx
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/nose-pose19Ps.onnx=model/nose-pose19Ps.onnx
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/images/cat.jpg=images/cat.jpg
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/default_config.json=default_config.json
@@ -492,7 +492,7 @@ class TrackingApp:
         center = np.array((320, 90))
         self.Vorschau = np.array((640, 352))
         self.stream = NDIstream(self.name, self.Vorschau)
-        self.head_detector = YOLOv8('model/head_s_640.onnx', 0.3, 0.5)
+        self.head_detector = YOLOv8('model/head_640_v8s.onnx', 0.4, 0.5)
         self.head_pose = YOLOv8('model/nose-pose19Ps.onnx', 0.6)
         self.move = CamController(self.stream, self.Vorschau, center, speed, lock_hvz)
         self.window = windowGUI(f'PTZ Tracker {self.name}', self.move)
@@ -504,7 +504,7 @@ class TrackingApp:
         self.record = False
         if self.record:
             self.fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4
-            self.video = cv2.VideoWriter(f'offline/{self.name}.mp4', self.fourcc, fps=25, frameSize=self.Vorschau)
+            self.video = cv2.VideoWriter(f'offline/{self.name}.mp4', self.fourcc, fps=30, frameSize=self.Vorschau)
     
     def preprocess(self):
         frame = self.stream.get_frame()
@@ -696,7 +696,7 @@ class kivyApp(App):
         self.tracker.move.fps = fps
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_size = 0.6
-        if fps > 23.5:
+        if fps > 28.5:
             font_color = (0, 255, 0)  # BGR color
         else:
             font_color = (0, 0, 255)

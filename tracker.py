@@ -368,15 +368,15 @@ class CamController:
         if self.lock_ptz[0]:
             pan = 0
         else:
-            pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1.3)
-            if self.fps < 24:
-                pan *= self.fps / 24
+            pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1)
+            if self.fps < 28:
+                pan *= self.fps / 28
         if self.lock_ptz[1]:
             tilt = 0
         else:
-            tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1.3, max_speed=0.5)
-            if self.fps < 24:
-                tilt *= self.fps / 24
+            tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1, max_speed=0.5)
+            if self.fps < 28:
+                tilt *= self.fps / 28
         self.cam.pan_tilt((pan, tilt))
         if not self.lock_ptz[2] and tracked.mosse == None:
             if tracked_box[2] > tracked_box[3]:                  # norm by height of tracked object
@@ -384,8 +384,8 @@ class CamController:
             else:
                 tracked_height = tracked_box[3] / self.shape[1]  # height larger than width
             zoom = self.calc_controlls(tracked_height, self.target_height, self.pidcontroller[2], self.deadzone[2], exponent=1.2)
-            if self.fps < 24:
-                zoom *= self.fps / 24
+            if self.fps < 28:
+                zoom *= self.fps / 28
             self.cam.zoom(-zoom)
 
     def control(self, keys, tracking=False):
@@ -636,7 +636,7 @@ class kivyApp(App):
         self.tracker.preprocess()
         self.thread = Thread(target=self.loop, daemon=True)
         self.thread.start()
-        Clock.schedule_interval(self.update_image, 1/27)
+        Clock.schedule_interval(self.update_image, 1/33)
 
         # pack layout
         layout.add_widget(self.image)

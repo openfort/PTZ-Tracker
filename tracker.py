@@ -4,6 +4,7 @@
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/model/nose-pose19Ps.onnx=model/nose-pose19Ps.onnx
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/images/cat.jpg=images/cat.jpg
 # nuitka-project: --include-data-files={MAIN_DIRECTORY}/default_config.json=default_config.json
+# nuitka-project: --include-data-files={MAIN_DIRECTORY}/LICENSE=LICENSE
 
 # updates:
     # fixed some performance issues and preview scaling

@@ -391,7 +391,7 @@ class CamController:
 
     def control(self, keys, tracking=False):
         if tracking:
-            speed = 0.2
+            speed = 0.1
             zoomspeed = 0.4
         else:
             speed = 0.5

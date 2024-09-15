@@ -44,7 +44,7 @@ The tracker is in use at lifechurch wil. Here are some links to see tracking in 
 
 ## Installation Windows
 
-The inference runs on windows direct-ml, only windows version is avaiable yet.
+The inference runs on windows direct-ml, only windows version is available yet.
 
 1. Download Release (tracker.zip) file
 2. Extract files

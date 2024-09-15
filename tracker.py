@@ -369,13 +369,13 @@ class CamController:
         if self.lock_ptz[0]:
             pan = 0
         else:
-            pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1)
+            pan = self.calc_controlls(tracked_point[0], self.xy[0], self.pidcontroller[0], self.deadzone[0], tracked.movement[0], mov_dir_strength=self.speed_factor_strength, exponent=1.3)
             if self.fps < 28:
                 pan *= self.fps / 28
         if self.lock_ptz[1]:
             tilt = 0
         else:
-            tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1, max_speed=0.5)
+            tilt = self.calc_controlls(tracked_point[1], self.xy[1], self.pidcontroller[1], self.deadzone[1], tracked.movement[1], mov_dir_strength=self.speed_factor_strength, exponent=1.3, max_speed=0.5)
             if self.fps < 28:
                 tilt *= self.fps / 28
         self.cam.pan_tilt((pan, tilt))
@@ -391,15 +391,17 @@ class CamController:
 
     def control(self, keys, tracking=False):
         if tracking:
-            speed = 0.1
+            speed = 0.2
+            zoomspeed = 0.4
         else:
-            speed = 0.3
+            speed = 0.5
+            zoomspeed = 0.8
         if 'e' in keys:
             self.moving_flag = 1
-            self.cam.zoom(speed*2)
+            self.cam.zoom(zoomspeed)
         if 'c' in keys:
             self.moving_flag = 1
-            self.cam.zoom(-speed*2)
+            self.cam.zoom(-zoomspeed)
         if 'w' in keys:
             self.moving_flag = 1
             self.cam.pan_tilt((0, -speed))

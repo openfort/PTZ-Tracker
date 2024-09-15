@@ -14,8 +14,6 @@ You may also use [NDI tools](ndi.video/tools).
 
 ![](https://github.com/openfort/PTZ-Tracker/blob/main/images/demo.jpg?raw=true)
 
-
-
 The tracker is in use at lifechurch wil. Here are some links to see tracking in action on youtube:
 
 - [youtube - lifechurch wil](https://youtu.be/Er5B_IqR304?t=710)
@@ -36,7 +34,7 @@ The tracker is in use at lifechurch wil. Here are some links to see tracking in 
 
 ## Tested hardware
 
-- GTX1660 and Birddog P400 (Up to 4 individual streams at 25 fps)
+- GTX1660 and Birddog P400 (Up to 4 individual streams at 30 fps)
 
 ## Related projects
 

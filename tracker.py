@@ -28,7 +28,7 @@
 
 # author: openfort
 # date: 22.02.24
-# version: 0.1.0
+# version: 0.1.1
 
 from kivy.app import App
 from kivy.uix.image import AsyncImage
@@ -617,7 +617,7 @@ class kivyApp(App):
         Window.size = (1280, 704)
         Window.bind(on_key_down=self.on_keyboard_down)
         Window.bind(on_key_up=self.on_keyboard_up)
-        self.title = f'tracking App 0.1.0'
+        self.title = f'tracking App 0.1.1 preview'
         layout = BoxLayout(orientation='vertical')
 
         # image widget

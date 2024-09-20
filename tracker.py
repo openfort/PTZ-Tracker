@@ -54,20 +54,15 @@ def intersec(single_box, bounding_boxes):
     Returns:
     - Array of intersection values between the single box and each box in the array.
     """
-    dx = np.abs(single_box[0] - bounding_boxes[:, 0])
-    dy = np.abs(single_box[1] - bounding_boxes[:, 1])
-    intersection = np.zeros(len(bounding_boxes))
-    mask_x = dx <= (bounding_boxes[:, 2] + single_box[2]) / 2
-    mask_y = dy <= (bounding_boxes[:, 3] + single_box[3]) / 2
-    mask = mask_x & mask_y
-    u = np.maximum(single_box[1] - single_box[3] / 2, bounding_boxes[:, 1] - bounding_boxes[:, 3] / 2)
-    t = np.minimum(single_box[1] + single_box[3] / 2, bounding_boxes[:, 1] + bounding_boxes[:, 3] / 2)
-    r = np.maximum(single_box[0] - single_box[2] / 2, bounding_boxes[:, 0] - bounding_boxes[:, 2] / 2)
-    l = np.minimum(single_box[0] + single_box[2] / 2, bounding_boxes[:, 0] + bounding_boxes[:, 2] / 2)
-    h = np.maximum(0, t - u)
-    w = np.maximum(0, l - r)
-    intersection[mask] = (2 * w[mask] * h[mask]) / (single_box[2] * single_box[3] + bounding_boxes[mask, 2] * bounding_boxes[mask, 3])
-    return np.array(intersection)
+    single_box[2:4] = np.maximum(0.01, single_box[2:4])
+    return np.where(np.logical_and(
+                np.abs(single_box[0] - bounding_boxes[:, 0]) <= (bounding_boxes[:, 2] + single_box[2]) / 2,     # filter overlaping in x direction
+                np.abs(single_box[1] - bounding_boxes[:, 1]) <= (bounding_boxes[:, 3] + single_box[3]) / 2      # and filter overlaping in y direction
+            ),
+            (2 * np.maximum(0, np.minimum(single_box[0] + single_box[2] / 2, bounding_boxes[:, 0] + bounding_boxes[:, 2] / 2) - np.maximum(single_box[0] - single_box[2] / 2, bounding_boxes[:, 0] - bounding_boxes[:, 2] / 2)) *       # calculate intersection
+             np.maximum(0, np.minimum(single_box[1] + single_box[3] / 2, bounding_boxes[:, 1] + bounding_boxes[:, 3] / 2) - np.maximum(single_box[1] - single_box[3] / 2, bounding_boxes[:, 1] - bounding_boxes[:, 3] / 2))) /
+             (single_box[2] * single_box[3] + bounding_boxes[:, 2] * bounding_boxes[:, 3]),       # divide by area of both boxes
+             0).astype('float32')
 
 class PIDController:
     def __init__(self, Kp, Ki, Kd):

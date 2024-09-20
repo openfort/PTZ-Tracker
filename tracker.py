@@ -127,6 +127,7 @@ class NDIstream:
         self.resolution = resolution
         self.name = NDI_cam
         self.frame = None
+        self.last_frame = None
         self.ndi_recv = None
         self.ndi_find = None
         ndi.initialize()
@@ -176,6 +177,7 @@ class NDIstream:
                 t, v, a, m = ndi.recv_capture_v3(self.ndi_recv, 100)
                 if t == ndi.FRAME_TYPE_VIDEO:
                     # print('Video data received (%dx%d).' % (v.xres, v.yres))
+                    self.last_frame = self.frame
                     if v.xres == 640:
                         self.frame = np.copy(v.data[:352,:,:3])     # crop to 640x352, drop alpha
                     else:
@@ -295,11 +297,12 @@ class tracked_obj:
         self.direction = np.zeros(2)    # xy
         self.direction_new = False
         self.lost_frames = 0
+        self.lost_mosse = 0
         self.mosse = None
         self.active = 1
         self.movement = np.zeros(2)     # moved direction from last frame
     
-    def update(self, detected_heads, frame):
+    def update(self, detected_heads, frame, last_frame):
         # get intersections from all detected heads
         xy_old = self.tracked_box[:2]
         intersections = intersec(self.tracked_box, detected_heads)
@@ -308,10 +311,17 @@ class tracked_obj:
             self.lost_frames += 1        # no matching object
             if self.lost_frames == 1:
                 #print('init mosse')
-                self.mosse = MOSSE_Tracker(frame, self.tracked_box)
-            elif self.lost_frames < 3*25:  # max length for mosse tracking, 3 seconds at 25 fps
-                #print('update mosse', self.lost_frames)
+                self.mosse = MOSSE_Tracker(last_frame, self.tracked_box)
                 self.tracked_box = self.mosse.update(frame)
+            elif self.lost_frames < 3*30:  # max length for mosse tracking, 3 seconds at 30 fps
+                #print('update mosse', self.lost_frames)
+                old_bbox = self.tracked_box
+                self.tracked_box = self.mosse.update(frame)
+                if old_bbox == self.tracked_box:
+                    self.lost_mosse +=1
+                if self.lost_mosse > 5:
+                    self.lost_mosse = 0
+                    return 0
             else:
                 #print('face lost')
                 return 0
@@ -511,7 +521,7 @@ class TrackingApp:
     def update_mt(self, keys):
         self.pressed_keys = keys
         if self.tracked != None:
-            if self.tracked.update(self.head_results, self.stream.frame) == 0:
+            if self.tracked.update(self.head_results, self.stream.frame, self.stream.last_frame) == 0:
                 self.tracked = None
                 self.move.stop()
                 #self.stream.load_preset(20)

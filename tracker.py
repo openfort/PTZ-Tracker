@@ -86,10 +86,10 @@ class MOSSE_Tracker:
         #size = tbbox[2] if tbbox[2] < tbbox[3] else tbbox[3]
         self.tbbox = np.array((tbbox[0]-tbbox[2]//2, tbbox[1]-tbbox[3]//2, tbbox[2], tbbox[3])).astype(np.int32)    # tlwh
         self.tracker = cv2.legacy.TrackerMOSSE_create()
-        self.tracker.init(cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR), self.tbbox)
+        self.tracker.init(frame, self.tbbox)
         
     def update(self, frame):
-        success, tbbox = self.tracker.update(cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR))
+        success, tbbox = self.tracker.update(frame)
         if success:
             #self.bbox = [ bbox[0]+bbox[2]//2, bbox[1]+bbox[3]//2, bbox[2], bbox[3] ]
             self.tbbox = np.array(tbbox).astype(np.int32)

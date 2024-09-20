@@ -177,9 +177,9 @@ class NDIstream:
                 if t == ndi.FRAME_TYPE_VIDEO:
                     # print('Video data received (%dx%d).' % (v.xres, v.yres))
                     if v.xres == 640:
-                        self.frame = np.copy(v.data[:352,:,:3])     # crop to 640x352
+                        self.frame = np.copy(v.data[:352,:,:3])     # crop to 640x352, drop alpha
                     else:
-                        self.frame = cv2.resize(np.copy(v.data[:,:,0:3]), self.resolution, interpolation=cv2.INTER_NEAREST)     # with resizing to 640x352
+                        self.frame = cv2.resize(np.copy(v.data[:,:,:3]), self.resolution, interpolation=cv2.INTER_NEAREST)     # with resizing to 640x352, drop alpha
                     ndi.recv_free_video_v2(self.ndi_recv, v)
                     return self.frame
                 elif t == ndi.FRANE_TYPE_STATUS_CHANGE:

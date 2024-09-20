@@ -546,14 +546,6 @@ class TrackingApp:
 
         if self.record:
             self.video.release()
-
-    def find_head(self,event,x,y,flags,param):
-        if event == cv2.EVENT_LBUTTONDOWN:
-            #print('clicked',x,y)
-            intersections = intersec([x,y,5,5], self.head_results)
-            if np.max(intersections) != 0:
-                index = np.argmax(intersections)
-                self.tracked = tracked_obj(self.head_results[index], index)
     
     def find_head_kivy(self,x,y):   # x,y normalized
         #print('clicked',x,y)

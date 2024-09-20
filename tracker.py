@@ -319,6 +319,8 @@ class tracked_obj:
                 self.tracked_box = self.mosse.update(frame)
                 if old_bbox == self.tracked_box:
                     self.lost_mosse +=1
+                else:
+                    self.lost_mosse = 0
                 if self.lost_mosse > 5:
                     self.lost_mosse = 0
                     return 0
